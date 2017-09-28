@@ -1,0 +1,22 @@
+<hgroup>
+  <h1>D-Hub Logviewr</h1>
+  <h3>Minarai</h3>
+</hgroup>
+<div id="main">
+  <div ng-clock>
+    <div id="contents">
+      <form method="post" action="./logviewer.html">
+        <group ng-repeat="app in apps" style="display:block;margin:15px;">
+          <input ng-model="apps.appid" type="radio" name="appid" id="select{{$index+1}}"
+                 ng-value="app.application_id" ng-checked="$first">
+          <label for="select{{$index+1}}">{{app.name}}</label>
+        </group>
+        <!--<button ng-click="select()" type="button" class="button buttonBlue" id="btn-select">select-->
+        <button ng-click="select()" type="button" class="button buttonBlue" id="btn-select">select
+          <div class="ripples buttonRipples"><span class="ripplesCircle"></span></div>
+        </button>
+        <input type="hidden" name="token" value="{{data.token}}">
+      </form>
+    </div>
+  </div>
+</div>
