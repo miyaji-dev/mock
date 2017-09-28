@@ -1,0 +1,19 @@
+version: '2'
+services:
+  log_viewer2:
+    build: ./php
+    container_name: log_viewer2
+    hostname: log_viewer2
+    environment:
+      DATABASE_DSN   : 'mysql:host=us-cdbr-iron-east-05.cleardb.net:3306;dbname=heroku_33f0d4b8f52b13d;charset=utf8'
+      DATABASE_USER  : 'bdc4645fdcd706'
+      DATABASE_PASSWD: '3a8275ba'
+      API_TOKEN_VALIDATE: 'http://stg-dialogue-hub.minarai.io:3003/operator/validate'
+      LOGGER_TYPE: 'DebugLogger'
+    ports:
+#      - '80:80'
+      - '3009:3009'
+    volumes:
+      - ./html:/var/www/html
+      - ./log_viewer_app:/app
+      - ./php/httpd_logviewer.conf:/etc/apache2/conf-enabled/httpd_logviewer.conf

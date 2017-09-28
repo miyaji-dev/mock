@@ -1,0 +1,28 @@
+<hgroup>
+  <h1>D-Hub Logviewr</h1>
+  <h3>Minarai</h3>
+</hgroup>
+<div id="main">
+  <div id="contents">
+    <form>
+      <div class="group login">
+        <input type="text" id="organization" ng-model="org" ng-class="{used : !org=='' }">
+  			<span class="highlight"></span><span class="bar"></span>
+        <label>Organization</label>
+      </div>
+      <div class="group login">
+        <input type="text" id="e-mail" ng-model="email" ng-class="{used : !email==''}">
+  			<span class="highlight"></span><span class="bar"></span>
+        <label>E-mail</label>
+      </div>
+      <div class="group login">
+        <input type="password" id="password" ng-model="password" ng-class="{used : !password==''}">
+  			<span class="highlight"></span><span class="bar"></span>
+        <label>Password</label>
+      </div>
+      <button type="button" class="button buttonBlue" ng-click="login()">login
+        <div class="ripples buttonRipples"><span class="ripplesCircle"></span></div>
+      </button>
+    </form>
+  </div>
+</div>
