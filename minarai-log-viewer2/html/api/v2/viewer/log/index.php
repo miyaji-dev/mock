@@ -295,7 +295,6 @@ try {
   // SQLクエリ文字列
   //////////////////////////////
   $query = 'SELECT * FROM `logs` WHERE ' . $quertWhereAnd . ' ORDER BY `request_id` ' . $qOrderBy . ', `id` ' . $qOrderBy . ' LIMIT ' . $dataTotal . ';' ;
-echo "{$query}<br />\n";
 
   //////////////////////////////
   // DBアクセス
