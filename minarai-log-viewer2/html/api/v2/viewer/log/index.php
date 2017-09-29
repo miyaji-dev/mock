@@ -282,14 +282,10 @@ try {
     $queryWhereAndStrs[] = ['qr' => "? <= DATE_FORMAT(`created_at`, '{$qFormDateTime}')", 'val' => $qDateTime, 'bi' => PDO::PARAM_STR];
   }
 
-  // $qTable = "`logs`";
-  // if( $pageType === $VAL_PAGE_TYPE_PREV && ! empty($logId) ){
-  //   $qTable = "SELECT * FROM `logs` WHERE {$logId} > id ORDER BY id DESC LIMIT {$dataTotal};"
-  // }
-
   // SQL : 全WHERE(AND)句
   $quertWhereAnd = implode( ' AND ', array_column($queryWhereAndStrs, 'qr') );
 
+  // SQL : Order By 用文字列
   $qOrderBy = 'ASC';
   if( $pageType === $VAL_PAGE_TYPE_PREV ){
     $qOrderBy = 'DESC';
