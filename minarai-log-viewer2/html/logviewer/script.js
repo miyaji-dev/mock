@@ -1,12 +1,8 @@
-// create the module and name it myApp
 var myApp = angular.module('myApp', ['ngRoute']);
 
-
-// configure our routes
 myApp.config(function($routeProvider) {
   $routeProvider
 
-    // route for the home page
     .when('/', {
       templateUrl : 'pages/login.html',
       controller  : 'mainController'
@@ -21,21 +17,14 @@ myApp.config(function($routeProvider) {
       templateUrl : 'pages/select.html',
       controller  : 'selectController'
     })
+
     .when('/logviewer', {
       templateUrl : 'pages/logviewer.html',
       controller  : 'logviewerController'
     })
 });
 
-myApp.factory("SharedStateService", function() {
-    return {
-        token: '',
-        appid: ''
-    };
-});
-
-myApp.controller('mainController', function($scope, $http, $location, SharedStateService) {
-  $scope.data = SharedStateService;
+myApp.controller('mainController', function($scope, $http, $location) {
 
   $scope.login = function(){
     $http({
@@ -46,44 +35,29 @@ myApp.controller('mainController', function($scope, $http, $location, SharedStat
               password: $scope.password
             }
     })
-    // 成功時の処理
     .success(function(data, status, headers, config){
-      //SharedStateService.token = data.token;
-      console.log(data);
-      $scope.data.token = data.token;
-
-      if( ('sessionStorage' in window) && (window.sessionStorage !== null) ) {
-        window.sessionStorage.setItem('token', data.token);
-      }
-
+      window.sessionStorage.setItem('token', data.token);
       $location.path('/select');
     })
-    // 失敗時の処理（ページにエラーメッセージを反映）
     .error(function(data, status, headers, config){
-      alert("ログインに失敗しました。組織名、メールアドレス及びパスワードをご確認ください。");
+      alert("test");
     });
 
   }
 });
 
-myApp.controller('selectController', function($scope, $http, $location, SharedStateService) {
-  $scope.data = SharedStateService
+myApp.controller('selectController', function($scope, $http, $location) {
 
   $http({
     method: 'GET',
     url: 'http://stg-dialogue-hub.minarai.io:3003/operator/applications',
     params: { token: window.sessionStorage.getItem('token')}
   })
-  // 成功時の処理
   .success(function(data, status, headers, config){
     $scope.apps = data;
     $scope.apps.appid = data[0].application_id;
     window.sessionStorage.setItem('appid', data[0].application_id);
-    console.log(data);
-
-    //$location.path('/select');
   })
-  // 失敗時の処理（ページにエラーメッセージを反映）
   .error(function(data, status, headers, config){
     alert("アプリケーション一覧の取得に失敗しました。ログインからやり直してください。")
     $location.path('/login');
@@ -96,20 +70,21 @@ myApp.controller('selectController', function($scope, $http, $location, SharedSt
 });
 
 
-myApp.controller('logviewerController', function($scope, $http, $location, $interval, SharedStateService) {
-  $scope.data = SharedStateService;
+myApp.controller('logviewerController', function($scope, $http, $location, $interval) {
   $scope.is_autoupdate = false;
   $scope.is_loading = true;
 
   var DISPLAY_LIMIT = 200;      //最大表示件数(これ以上はページング)
-  var PAGEING_LIMIT = 100;      //取得件数
+  var PAGEING_LIMIT = 100;      //ページング時の取得件数
   var UPDATE_TIME   = 7;        //アップデートの間隔(秒)
 
-  //$scope.is_loading = true;
+  //初期表示
   show_list();
 
+  //自動更新
   var t = $interval(auto_update, UPDATE_TIME * 1000);
 
+  //初期表示
   function show_list(){
     var param_data = {
        token: window.sessionStorage.getItem('token'),
@@ -120,12 +95,11 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
        pagetype: 'next',
        datetime: ''
     };
-
     get_page(param_data);
   }
-  $scope.search = function(){
-    console.log("search");
 
+  //検索ボタン押下
+  $scope.search = function(){
     var param_data = {
       token: window.sessionStorage.getItem('token'),
       appid: window.sessionStorage.getItem('appid'),
@@ -135,11 +109,12 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
       pagetype: 'next',
       datetime: $scope.searchdate != null ? $scope.searchdate : ''
     }
-
+    //表示中のログを初期化
     $scope.logs = null;
     get_page(param_data);
   }
 
+  //次へボタン押下
   $scope.next = function(){
     console.log($scope.logs);
     var param_data = {
@@ -154,6 +129,7 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
     get_page(param_data);
   };
 
+  //前へボタン押下
   $scope.prev = function(){
     var param_data = {
       token: window.sessionStorage.getItem('token'),
@@ -175,7 +151,6 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
       url: '../api/v2/viewer/log',
       params: param_data
     })
-    // 成功時の処理
     .success(function(data, status, headers, config){
       if(data.logs == null){
         return;
@@ -221,7 +196,6 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
       console.log($scope.logs.length);
 
     })
-    // 失敗時の処理（ページにエラーメッセージを反映）
     .error(function(data, status, headers, config){
       $scope.is_loading = false;
       alert("ログの取得に失敗しました。");
@@ -258,10 +232,11 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
       console.log(data.engines.datas);
 
       for (var i=0; i<data.engines.total; i++){
-        var tmp = {log_id : '-',
-                   engine_name : data.engines.datas[i].engine_name,
-                   bot_utterance : data.engines.datas[i].raw_response
-                  }
+        var tmp = {
+          log_id : '-',
+          engine_name : data.engines.datas[i].engine_name,
+          bot_utterance : data.engines.datas[i].raw_response
+        }
         $scope.logs.splice(index + 1, 0, tmp);
       }
       //$scope.logs[index].engines = data.engines.datas
@@ -296,7 +271,7 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
   var is_pageup_event = true;   //スクロールイベント処理を重複させないための処理フラグ
   var is_pagedown_event = true; //スクロールイベント処理を重複させないための処理フラグ
 
-  //無限スクロールの実装
+  //無限スクロール
   $(window).bind("scroll", function() {
     var bottom_height = $('.bottom_row').offset().top;
     var scroll_height = $(document).scrollTop() + (window.innerHeight);
@@ -328,6 +303,4 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
       is_pageup_event = false;
     }
   });
-
-
 });
