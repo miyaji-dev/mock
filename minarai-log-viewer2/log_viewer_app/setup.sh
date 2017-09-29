@@ -8,7 +8,7 @@
 chmod 0777 ./logs
 
 # composerのでインストールを実行
-curr_dir=pwd
+curr_dir=`pwd`
 cd ./libs
 ./composer.phar install
 cd $curr_dir
