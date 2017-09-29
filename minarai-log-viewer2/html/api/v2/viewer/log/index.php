@@ -282,13 +282,24 @@ try {
     $queryWhereAndStrs[] = ['qr' => "? <= DATE_FORMAT(`created_at`, '{$qFormDateTime}')", 'val' => $qDateTime, 'bi' => PDO::PARAM_STR];
   }
 
+  // $qTable = "`logs`";
+  // if( $pageType === $VAL_PAGE_TYPE_PREV && ! empty($logId) ){
+  //   $qTable = "SELECT * FROM `logs` WHERE {$logId} > id ORDER BY id DESC LIMIT {$dataTotal};"
+  // }
+
   // SQL : 全WHERE(AND)句
   $quertWhereAnd = implode( ' AND ', array_column($queryWhereAndStrs, 'qr') );
+
+  $qOrderBy = 'ASC';
+  if( $pageType === $VAL_PAGE_TYPE_PREV ){
+    $qOrderBy = 'DESC';
+  }
 
   //////////////////////////////
   // SQLクエリ文字列
   //////////////////////////////
-  $query = 'SELECT * FROM `logs` WHERE ' . $quertWhereAnd . ' ORDER BY `request_id` ASC, `id` ASC' . ' LIMIT ' . $dataTotal . ';' ;
+  $query = 'SELECT * FROM `logs` WHERE ' . $quertWhereAnd . ' ORDER BY `request_id` ' . $qOrderBy . ', `id` ' . $qOrderBy . ' LIMIT ' . $dataTotal . ';' ;
+echo "{$query}<br />\n";
 
   //////////////////////////////
   // DBアクセス
@@ -337,6 +348,15 @@ try {
   // DB切断処理
   $stmt = null;
   $dbh  = null;
+}
+
+// 「$VAL_PAGE_TYPE_PREV」の場合は「DB : id」でソート
+if( $pageType === $VAL_PAGE_TYPE_PREV && ! empty($dbFetchDatas) ){
+  $sortFetchs = [];
+  foreach ((array) $dbFetchDatas as $fKey => $fValue) {
+      $sortFetchs[$fKey] = $fValue['id'];
+  }
+  array_multisort($sortFetchs, SORT_ASC, $dbFetchDatas);
 }
 
 $firstRequestId = '';
