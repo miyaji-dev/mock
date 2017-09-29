@@ -294,7 +294,7 @@ try {
   //////////////////////////////
   // SQLクエリ文字列
   //////////////////////////////
-  $query = 'SELECT * FROM `logs` WHERE ' . $quertWhereAnd . ' ORDER BY `request_id` ' . $qOrderBy . ', `id` ' . $qOrderBy . ' LIMIT ' . $dataTotal . ';' ;
+  $query = 'SELECT * FROM `logs` WHERE ' . $quertWhereAnd . ' ORDER BY `created_at` ' . $qOrderBy . ', `id` ' . $qOrderBy . ' LIMIT ' . $dataTotal . ';' ;
 
   //////////////////////////////
   // DBアクセス
