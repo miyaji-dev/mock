@@ -46,7 +46,7 @@ myApp.controller('mainController', function($scope, $http, $location, SharedStat
               password: $scope.password
             }
     })
-    // 成功時の処理（ページにあいさつメッセージを反映）
+    // 成功時の処理
     .success(function(data, status, headers, config){
       //SharedStateService.token = data.token;
       console.log(data);
@@ -54,7 +54,6 @@ myApp.controller('mainController', function($scope, $http, $location, SharedStat
 
       if( ('sessionStorage' in window) && (window.sessionStorage !== null) ) {
         window.sessionStorage.setItem('token', data.token);
-        console.log("session");
       }
 
       $location.path('/select');
@@ -109,56 +108,6 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
 
   var t = $interval(auto_update, UPDATE_TIME * 1000);
 
-  $scope.toggle_detail = function(index){
-    if(!$scope.logs[index].is_log){
-      return;
-    }
-    if(!$scope.logs[index].is_show_detail){
-      show_detail(index);
-      $scope.logs[index].is_show_detail = true;
-    }else {
-      hide_detail(index);
-      $scope.logs[index].is_show_detail = false;
-    }
-  };
-
-  function show_detail(index){
-    $http({
-      method: 'GET',
-      url: '../api/v2/viewer/log/',
-      params: { token: window.sessionStorage.getItem('token'),
-                appid: window.sessionStorage.getItem('appid'),
-                logid: $scope.logs[index].log_id,
-              }
-    })
-    // 成功時の処理（ページにあいさつメッセージを反映）
-    .success(function(data, status, headers, config){
-      //$scope.logs = data.logs.datas;
-      console.log(data.engines.datas);
-
-      for (var i=0; i<data.engines.total; i++){
-        var tmp = {log_id : '-',
-                   engine_name : data.engines.datas[i].engine_name,
-                   bot_utterance : data.engines.datas[i].raw_response
-                  }
-        $scope.logs.splice(index + 1, 0, tmp);
-      }
-      //$scope.logs[index].engines = data.engines.datas
-
-    })
-    // 失敗時の処理（ページにエラーメッセージを反映）
-    .error(function(data, status, headers, config){
-      alert("エンジン情報の取得に失敗しました。")
-    });
-  };
-
-  function hide_detail(index){
-    var i = index + 1;
-    while($scope.logs[i].log_id == '-'){
-      console.log($scope.logs[i]);
-      $scope.logs.splice(i, 1);
-    }
-  }
   function show_list(){
     var param_data = {
        token: window.sessionStorage.getItem('token'),
@@ -172,28 +121,31 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
     get_page(param_data);
   }
   $scope.search = function(){
+    console.log("search");
     var param_data = {
       token: window.sessionStorage.getItem('token'),
       appid: window.sessionStorage.getItem('appid'),
-      logid: $scope.logs[$scope.logs.length - 1].log_id,
-      reqid: $scope.logs[$scope.logs.length - 1].request_id,
+      logid: $scope.logs.length > 0 ? $scope.logs[$scope.logs.length - 1].log_id : '',
+      reqid: $scope.logs.length > 0 ? $scope.logs[$scope.logs.length - 1].request_id : '',
       total: DISPLAY_LIMIT,
       pagetype: 'next',
-      datetime: $scope.searchdate
-   }
+      datetime: $scope.searchdate != null ? $scope.searchdate : ''
+    }
+
    $scope.logs = null;
     get_page(param_data);
   }
 
   $scope.next = function(){
+    console.log($scope.logs);
     var param_data = {
       token: window.sessionStorage.getItem('token'),
       appid: window.sessionStorage.getItem('appid'),
-      logid: $scope.logs[$scope.logs.length - 1].log_id,
-      reqid: $scope.logs[$scope.logs.length - 1].request_id,
+      logid: $scope.logs.length > 0 ? $scope.logs[$scope.logs.length - 1].log_id : '',
+      reqid: $scope.logs.length > 0 ? $scope.logs[$scope.logs.length - 1].request_id : '',
       total: DISPLAY_LIMIT,
       pagetype: 'next',
-      datetime: $scope.searchdate
+      datetime: $scope.searchdate != null ? $scope.searchdate : ''
    }
     get_page(param_data);
   };
@@ -202,11 +154,11 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
     var param_data = {
       token: window.sessionStorage.getItem('token'),
       appid: window.sessionStorage.getItem('appid'),
-      logid: $scope.logs[0].log_id,
-      reqid: $scope.logs[0].request_id,
+      logid: $scope.logs.length > 0 ? $scope.logs[0].log_id : '',
+      reqid: $scope.logs.length > 0 ? $scope.logs[0].request_id : '',
       total: DISPLAY_LIMIT,
       pagetype: 'prev',
-      datetime: $scope.searchdate
+      datetime: $scope.searchdate != null ? $scope.searchdate : ''
     }
     get_page(param_data);
   };
@@ -219,7 +171,9 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
     })
     // 成功時の処理
     .success(function(data, status, headers, config){
-      console.log(data);
+      if(data.logs == null){
+        return;
+      }
       for(var i=0; i<data.logs.datas.length; i++){
         data.logs.datas[i].is_show_detail = false;
         data.logs.datas[i].is_log = true;
@@ -264,11 +218,59 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
     });
   }
 
+  $scope.toggle_detail = function(index){
+    if(!$scope.logs[index].is_log){
+      return;
+    }
+    if(!$scope.logs[index].is_show_detail){
+      show_detail(index);
+      $scope.logs[index].is_show_detail = true;
+    }else {
+      hide_detail(index);
+      $scope.logs[index].is_show_detail = false;
+    }
+  };
+
+  function show_detail(index){
+    $http({
+      method: 'GET',
+      url: '../api/v2/viewer/engine/',
+      params: { token: window.sessionStorage.getItem('token'),
+                logid: $scope.logs[index].log_id
+              }
+    })
+    // 成功時の処理
+    .success(function(data, status, headers, config){
+      //$scope.logs = data.logs.datas;
+      console.log(data.engines.datas);
+
+      for (var i=0; i<data.engines.total; i++){
+        var tmp = {log_id : '-',
+                   engine_name : data.engines.datas[i].engine_name,
+                   bot_utterance : data.engines.datas[i].raw_response
+                  }
+        $scope.logs.splice(index + 1, 0, tmp);
+      }
+      //$scope.logs[index].engines = data.engines.datas
+
+    })
+    // 失敗時の処理（ページにエラーメッセージを反映）
+    .error(function(data, status, headers, config){
+      alert("エンジン情報の取得に失敗しました。")
+    });
+  };
+
+  function hide_detail(index){
+    var i = index + 1;
+    while($scope.logs[i].log_id == '-'){
+      console.log($scope.logs[i]);
+      $scope.logs.splice(i, 1);
+    }
+  };
+
   //自動差分更新
   function auto_update(){
     if($scope.is_autoupdate){
-      var len = $scope.logs.length - 1;
-        console.log("auto_updated! len=" + len);
         $scope.next();
     }
   };
