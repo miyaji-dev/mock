@@ -98,9 +98,9 @@ myApp.controller('selectController', function($scope, $http, $location, SharedSt
 
 myApp.controller('logviewerController', function($scope, $http, $location, $interval, SharedStateService) {
   $scope.data = SharedStateService;
-  $scope.is_autoupdate = true;
+  $scope.is_autoupdate = false;
 
-  var DISPLAY_LIMIT = 250;      //最大表示件数(これ以上はページング)
+  var DISPLAY_LIMIT = 200;      //最大表示件数(これ以上はページング)
   var PAGEING_LIMIT = 100;      //取得件数
   var UPDATE_TIME   = 3;        //アップデートの間隔(秒)
 
@@ -118,6 +118,7 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
        pagetype: 'next',
        datetime: ''
     };
+
     get_page(param_data);
   }
   $scope.search = function(){
@@ -125,14 +126,15 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
     var param_data = {
       token: window.sessionStorage.getItem('token'),
       appid: window.sessionStorage.getItem('appid'),
-      logid: $scope.logs.length > 0 ? $scope.logs[$scope.logs.length - 1].log_id : '',
-      reqid: $scope.logs.length > 0 ? $scope.logs[$scope.logs.length - 1].request_id : '',
-      total: DISPLAY_LIMIT,
+      logid: '',
+      reqid: '',
+      total: PAGEING_LIMIT,
       pagetype: 'next',
       datetime: $scope.searchdate != null ? $scope.searchdate : ''
     }
 
-   $scope.logs = null;
+    $scope.logs = null;
+
     get_page(param_data);
   }
 
@@ -143,7 +145,7 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
       appid: window.sessionStorage.getItem('appid'),
       logid: $scope.logs.length > 0 ? $scope.logs[$scope.logs.length - 1].log_id : '',
       reqid: $scope.logs.length > 0 ? $scope.logs[$scope.logs.length - 1].request_id : '',
-      total: DISPLAY_LIMIT,
+      total: PAGEING_LIMIT,
       pagetype: 'next',
       datetime: $scope.searchdate != null ? $scope.searchdate : ''
    }
@@ -156,7 +158,7 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
       appid: window.sessionStorage.getItem('appid'),
       logid: $scope.logs.length > 0 ? $scope.logs[0].log_id : '',
       reqid: $scope.logs.length > 0 ? $scope.logs[0].request_id : '',
-      total: DISPLAY_LIMIT,
+      total: PAGEING_LIMIT,
       pagetype: 'prev',
       datetime: $scope.searchdate != null ? $scope.searchdate : ''
     }
@@ -178,6 +180,7 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
         data.logs.datas[i].is_show_detail = false;
         data.logs.datas[i].is_log = true;
       }
+
       if($scope.logs != null){
 
         if(param_data.pagetype == 'next'){

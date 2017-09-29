@@ -88,3 +88,19 @@ h1 {
   padding:0px;
 
 }
+.loading_mask{
+	position:fixed;
+	top:0px;
+	width:100%;
+	height:100%;
+	background-color:#fff;
+	opacity:0.0;
+	z-index:10000;
+}
+
+.loading{
+	position:fixed;
+	top:40%;
+	width:100%;
+	z-index:11000;
+}
