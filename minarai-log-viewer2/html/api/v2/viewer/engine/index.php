@@ -9,7 +9,7 @@ set_include_path( get_include_path() . PATH_SEPARATOR . '/app' );
 
 include_once 'classes/LogViewer.class.php';
 include_once 'classes/ParamCheckException.class.php';
-include_once 'libs/log4php/Logger.php';
+include_once 'libs/vendor/autoload.php';
 // ログ
 Logger::configure( '/app/config/log4php.properties' );
 
