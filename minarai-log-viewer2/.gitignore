@@ -3,6 +3,5 @@
 .DS_Store
 
 /log_viewer_app/libs/vendor
-/log_viewer_app/logs/
 
 !.gitkeep
