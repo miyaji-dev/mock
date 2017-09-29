@@ -142,15 +142,6 @@ $dateTime = ( ! empty($_REQUEST[$PN_DATETIME]) )
 $pageType = ( ! empty($_REQUEST[$PN_PAGE_TYPE]) )
               ? $_REQUEST[$PN_PAGE_TYPE] : $VAL_PAGE_TYPE_NEXT;
 
-if( ! empty($dateTime) ){
-  // 日付と時刻にデリミタで分割
-  list($pDate, $pTime) = explode($DATETIME_DELIM, $dateTime);
-  // 日付をデリミタで分割
-  list($pYear, $pMonth, $pDay) = explode($DATE_DELIM, $pDate);
-  // 時刻をデリミタで分割
-  list($pHour, $pMin, $pSec) = explode($TIME_DELIM, $pTime);
-}
-
 // 日時フォーマット文字列
 $dateTimeFormat = sprintf(
   'Y%sm%sd%sH%si%ss',
@@ -190,6 +181,15 @@ try {
     $errMsgParamCheck = "ログIDかリクエストIDがありません : {$PN_LOG_ID}={$logId}, {$PN_REQUEST_ID}={$reqId}";
 
   } elseif( ! empty($dateTime) ){
+    if( ! empty($dateTime) ){
+      // 日付と時刻にデリミタで分割
+      list($pDate, $pTime) = explode($DATETIME_DELIM, $dateTime);
+      // 日付をデリミタで分割
+      list($pYear, $pMonth, $pDay) = explode($DATE_DELIM, $pDate);
+      // 時刻をデリミタで分割
+      list($pHour, $pMin, $pSec) = explode($TIME_DELIM, $pTime);
+    }
+
     // 日時フォーマットチェック用文字列
     $tmpDateTimeCheckStr = $pYear;
     $qDateTime = $pYear;
@@ -271,14 +271,16 @@ try {
     // $queryWhereAndStrs["? {$qPageTypeArrowReq} `request_id`"] = PDO::PARAM_STR;
     $queryWhereAndStrs[] = ['qr' => "? {$qPageTypeArrowReq} `request_id`", 'val' => $reqId, 'bi' => PDO::PARAM_STR];
   }
-  // 日時指定 が無い場合
-  if( empty($qDateTime) ){
-    // 現在日時
-    $qDateTime = date( sprintf('Y%sm%sd', $DATE_DELIM, $DATE_DELIM) );
-    $qFormDateTime = "%Y{$DATE_DELIM}%m{$DATE_DELIM}%d";
+  // // 日時指定 が無い場合
+  // if( empty($qDateTime) ){
+  //   // 現在日時
+  //   $qDateTime = date( sprintf('Y%sm%sd', $DATE_DELIM, $DATE_DELIM) );
+  //   $qFormDateTime = "%Y{$DATE_DELIM}%m{$DATE_DELIM}%d";
+  // }
+  // 日時指定 がある場合
+  if( ! empty($qDateTime) ){
+    $queryWhereAndStrs[] = ['qr' => "? <= DATE_FORMAT(`created_at`, '{$qFormDateTime}')", 'val' => $qDateTime, 'bi' => PDO::PARAM_STR];
   }
-  // $queryWhereAndStrs["'{$qDateTime}' <= DATE_FORMAT(`created_at`, '{$qFormDateTime}')"] = PDO::PARAM_STR;
-  $queryWhereAndStrs[] = ['qr' => "? <= DATE_FORMAT(`created_at`, '{$qFormDateTime}')", 'val' => $qDateTime, 'bi' => PDO::PARAM_STR];
 
   // SQL : 全WHERE(AND)句
   $quertWhereAnd = implode( ' AND ', array_column($queryWhereAndStrs, 'qr') );
