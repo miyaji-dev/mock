@@ -9,7 +9,7 @@ services:
       DATABASE_USER  : 'bdc4645fdcd706'
       DATABASE_PASSWD: '3a8275ba'
       API_TOKEN_VALIDATE: 'http://stg-dialogue-hub.minarai.io:3003/operator/validate'
-      LOGGER_TYPE: 'DebugLogger'
+      LOGGER_TYPE: 'DefaultLogger'
     ports:
 #      - '80:80'
       - '3009:3009'
