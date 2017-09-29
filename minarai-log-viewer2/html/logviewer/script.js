@@ -40,7 +40,7 @@ myApp.controller('mainController', function($scope, $http, $location) {
       $location.path('/select');
     })
     .error(function(data, status, headers, config){
-      alert("test");
+      alert("ログインに失敗しました。組織名、メールアドレス、パスワードをご確認ください。");
     });
 
   }
@@ -56,7 +56,6 @@ myApp.controller('selectController', function($scope, $http, $location) {
   .success(function(data, status, headers, config){
     $scope.apps = data;
     $scope.apps.appid = data[0].application_id;
-    window.sessionStorage.setItem('appid', data[0].application_id);
   })
   .error(function(data, status, headers, config){
     alert("アプリケーション一覧の取得に失敗しました。ログインからやり直してください。")
@@ -64,6 +63,7 @@ myApp.controller('selectController', function($scope, $http, $location) {
   });
 
   $scope.select = function(){
+    window.sessionStorage.setItem('appid', $scope.apps.appid);
     $location.path('/logviewer');
   }
 
@@ -96,7 +96,12 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
        datetime: ''
     };
     get_page(param_data);
-  }
+  };
+
+  //アプリケーション選択へ
+  $scope.select_app = function(){
+    $location.path('./select');
+  };
 
   //検索ボタン押下
   $scope.search = function(){
@@ -112,11 +117,10 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
     //表示中のログを初期化
     $scope.logs = null;
     get_page(param_data);
-  }
+  };
 
   //次へボタン押下
   $scope.next = function(){
-    console.log($scope.logs);
     var param_data = {
       token: window.sessionStorage.getItem('token'),
       appid: window.sessionStorage.getItem('appid'),
@@ -164,43 +168,44 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
 
       if($scope.logs != null){
 
+        //次ページの場合、取得結果を末尾に追加
         if(param_data.pagetype == 'next'){
           $scope.logs = $scope.logs.concat(data.logs.datas);
 
+          //表示上限を超える場合、超過件数分のログを先頭から削除
           if($scope.logs.length > DISPLAY_LIMIT){
             $scope.logs.splice(0, $scope.logs.length - DISPLAY_LIMIT);
 
+            //エンジン情報を表示していた場合の考慮
             while($scope.logs[0].log_id == '-'){
               $scope.logs.shift();
             }
           }
-
+        //前ページの場合、取得結果を先頭に追加
         }else if(param_data.pagetype == 'prev'){
           $scope.logs = data.logs.datas.concat($scope.logs)
 
+          //表示上限を超える場合、超過件数分のログを末尾から削除
           if($scope.logs.length > DISPLAY_LIMIT){
-            var count = $scope.logs.length - DISPLAY_LIMIT;
-            console.log(count);
-            for(var i=0; i < count; i++ ){
+            for(var i=0; i < ($scope.logs.length - DISPLAY_LIMIT); i++ ){
               $scope.logs.pop();
             }
+            //エンジンの情報を表示していた場合の考慮
             while($scope.logs[$scope.logs.length - 1].log_id == '-'){
               $scope.logs.pop();
             }
           }
         }
+      //現時点で表示データが存在しない場合、結果をそのまま表示
       }else{
         $scope.logs = data.logs.datas;
       }
-      console.log(data.logs.datas);
-      console.log($scope.logs.length);
-
     })
     .error(function(data, status, headers, config){
       $scope.is_loading = false;
       alert("ログの取得に失敗しました。");
     })
-  }
+  };
 
   $scope.toggle_detail = function(index){
     if(!$scope.logs[index].is_log){
@@ -266,12 +271,12 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
     }
   };
 
-
   var is_search_result = false; //検索結果を表示しているか
   var is_pageup_event = true;   //スクロールイベント処理を重複させないための処理フラグ
   var is_pagedown_event = true; //スクロールイベント処理を重複させないための処理フラグ
 
   //無限スクロール
+  //TODO ディレクティブで書き直す
   $(window).bind("scroll", function() {
     var bottom_height = $('.bottom_row').offset().top;
     var scroll_height = $(document).scrollTop() + (window.innerHeight);
