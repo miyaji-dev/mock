@@ -267,9 +267,8 @@ try {
     $queryWhereAndStrs[] = ['qr' => "? {$qPageTypeArrowLog} `id`", 'val' => $logId, 'bi' => PDO::PARAM_INT];
   }
   if( ! empty($reqId) ){
-    $qPageTypeArrowReq = ($pageType === $VAL_PAGE_TYPE_NEXT) ? '<=' : '>=';
-    // $queryWhereAndStrs["? {$qPageTypeArrowReq} `request_id`"] = PDO::PARAM_STR;
-    $queryWhereAndStrs[] = ['qr' => "? {$qPageTypeArrowReq} `request_id`", 'val' => $reqId, 'bi' => PDO::PARAM_STR];
+    // $qPageTypeArrowReq = ($pageType === $VAL_PAGE_TYPE_NEXT) ? '<=' : '>=';
+    // $queryWhereAndStrs[] = ['qr' => "? {$qPageTypeArrowReq} `request_id`", 'val' => $reqId, 'bi' => PDO::PARAM_STR];
   }
   // // 日時指定 が無い場合
   // if( empty($qDateTime) ){
@@ -295,6 +294,7 @@ try {
   // SQLクエリ文字列
   //////////////////////////////
   $query = 'SELECT * FROM `logs` WHERE ' . $quertWhereAnd . ' ORDER BY `created_at` ' . $qOrderBy . ', `id` ' . $qOrderBy . ' LIMIT ' . $dataTotal . ';' ;
+// echo "{$query}<br />\n";
 
   //////////////////////////////
   // DBアクセス
