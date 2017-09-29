@@ -1,9 +1,9 @@
 version: '2'
 services:
-  log_viewer2:
+  log_viewer:
     build: ./php
-    container_name: log_viewer2
-    hostname: log_viewer2
+    container_name: log_viewer
+    hostname: log_viewer
     environment:
       DATABASE_DSN   : 'mysql:host=us-cdbr-iron-east-05.cleardb.net:3306;dbname=heroku_33f0d4b8f52b13d;charset=utf8'
       DATABASE_USER  : 'bdc4645fdcd706'
