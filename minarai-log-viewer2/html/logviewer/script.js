@@ -103,7 +103,7 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
 
   var DISPLAY_LIMIT = 200;      //最大表示件数(これ以上はページング)
   var PAGEING_LIMIT = 100;      //取得件数
-  var UPDATE_TIME   = 3;        //アップデートの間隔(秒)
+  var UPDATE_TIME   = 7;        //アップデートの間隔(秒)
 
   //$scope.is_loading = true;
   show_list();
@@ -242,6 +242,8 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
   };
 
   function show_detail(index){
+    $scope.is_loading = true;
+
     $http({
       method: 'GET',
       url: '../api/v2/viewer/engine/',
@@ -251,6 +253,7 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
     })
     // 成功時の処理
     .success(function(data, status, headers, config){
+      $scope.is_loading = false;
       //$scope.logs = data.logs.datas;
       console.log(data.engines.datas);
 
@@ -266,6 +269,7 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
     })
     // 失敗時の処理（ページにエラーメッセージを反映）
     .error(function(data, status, headers, config){
+      $scope.is_loading = false;
       alert("エンジン情報の取得に失敗しました。")
     });
   };
@@ -282,6 +286,8 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
   function auto_update(){
     if($scope.is_autoupdate){
         $scope.next();
+        var target = $(".bottom_row");
+        $(window).scrollTop(target.offset().top);
     }
   };
 
