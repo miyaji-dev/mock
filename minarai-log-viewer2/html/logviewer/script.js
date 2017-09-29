@@ -84,20 +84,6 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
   //自動更新
   var t = $interval(auto_update, UPDATE_TIME * 1000);
 
-  //初期表示
-  function show_list(){
-    var param_data = {
-       token: window.sessionStorage.getItem('token'),
-       appid: window.sessionStorage.getItem('appid'),
-       logid: '',
-       reqid: '',
-       total: DISPLAY_LIMIT,
-       pagetype: 'next',
-       datetime: ''
-    };
-    get_page(param_data);
-  };
-
   //アプリケーション選択へ
   $scope.select_app = function(){
     $location.path('./select');
@@ -144,6 +130,33 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
       pagetype: 'prev',
       datetime: $scope.searchdate != null ? $scope.searchdate : ''
     }
+    get_page(param_data);
+  };
+
+  $scope.toggle_detail = function(index){
+    if(!$scope.logs[index].is_log){
+      return;
+    }
+    if(!$scope.logs[index].is_show_detail){
+      show_detail(index);
+      $scope.logs[index].is_show_detail = true;
+    }else {
+      hide_detail(index);
+      $scope.logs[index].is_show_detail = false;
+    }
+  };
+
+  //初期表示
+  function show_list(){
+    var param_data = {
+       token: window.sessionStorage.getItem('token'),
+       appid: window.sessionStorage.getItem('appid'),
+       logid: '',
+       reqid: '',
+       total: DISPLAY_LIMIT,
+       pagetype: 'next',
+       datetime: ''
+    };
     get_page(param_data);
   };
 
@@ -207,19 +220,6 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
     })
   };
 
-  $scope.toggle_detail = function(index){
-    if(!$scope.logs[index].is_log){
-      return;
-    }
-    if(!$scope.logs[index].is_show_detail){
-      show_detail(index);
-      $scope.logs[index].is_show_detail = true;
-    }else {
-      hide_detail(index);
-      $scope.logs[index].is_show_detail = false;
-    }
-  };
-
   function show_detail(index){
     $scope.is_loading = true;
 
@@ -230,11 +230,8 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
                 logid: $scope.logs[index].log_id
               }
     })
-    // 成功時の処理
     .success(function(data, status, headers, config){
       $scope.is_loading = false;
-      //$scope.logs = data.logs.datas;
-      console.log(data.engines.datas);
 
       for (var i=0; i<data.engines.total; i++){
         var tmp = {
@@ -244,10 +241,8 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
         }
         $scope.logs.splice(index + 1, 0, tmp);
       }
-      //$scope.logs[index].engines = data.engines.datas
 
     })
-    // 失敗時の処理（ページにエラーメッセージを反映）
     .error(function(data, status, headers, config){
       $scope.is_loading = false;
       alert("エンジン情報の取得に失敗しました。")
