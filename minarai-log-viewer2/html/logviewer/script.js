@@ -99,11 +99,13 @@ myApp.controller('selectController', function($scope, $http, $location, SharedSt
 myApp.controller('logviewerController', function($scope, $http, $location, $interval, SharedStateService) {
   $scope.data = SharedStateService;
   $scope.is_autoupdate = false;
+  $scope.is_loading = true;
 
   var DISPLAY_LIMIT = 200;      //最大表示件数(これ以上はページング)
   var PAGEING_LIMIT = 100;      //取得件数
   var UPDATE_TIME   = 3;        //アップデートの間隔(秒)
 
+  //$scope.is_loading = true;
   show_list();
 
   var t = $interval(auto_update, UPDATE_TIME * 1000);
@@ -123,6 +125,7 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
   }
   $scope.search = function(){
     console.log("search");
+
     var param_data = {
       token: window.sessionStorage.getItem('token'),
       appid: window.sessionStorage.getItem('appid'),
@@ -134,7 +137,6 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
     }
 
     $scope.logs = null;
-
     get_page(param_data);
   }
 
@@ -166,6 +168,8 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
   };
 
   function get_page(param_data){
+    $scope.is_loading = true;
+
     $http({
       method: 'GET',
       url: '../api/v2/viewer/log',
@@ -176,6 +180,8 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
       if(data.logs == null){
         return;
       }
+      $scope.is_loading = false;
+
       for(var i=0; i<data.logs.datas.length; i++){
         data.logs.datas[i].is_show_detail = false;
         data.logs.datas[i].is_log = true;
@@ -217,8 +223,9 @@ myApp.controller('logviewerController', function($scope, $http, $location, $inte
     })
     // 失敗時の処理（ページにエラーメッセージを反映）
     .error(function(data, status, headers, config){
-      alert("ログの取得に失敗しました。")
-    });
+      $scope.is_loading = false;
+      alert("ログの取得に失敗しました。");
+    })
   }
 
   $scope.toggle_detail = function(index){
